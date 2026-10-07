@@ -65,8 +65,8 @@ git checkout -b <branch_name>
 ## Step 6 — Research the codebase
 Read these before writing the spec:
 - `CLAUDE.md` — project, backend API contract, booking
-  rules, money, timezones, auth and data access, design,
-  page table
+  rules, money, timezones, auth and data access, code
+  organization, design, page table
 - `AGENTS.md`, then the guides in
   `node_modules/next/dist/docs/` for whatever the feature
   touches (route handlers, server actions, `proxy.ts`,
@@ -152,8 +152,11 @@ Field names are as confirmed by the user.
 If none: state "No backend calls".
 
 ## Types and schemas
-Each TypeScript type and zod schema, the file in `lib/` it
-lives in, and where it is reused. A response is typed once.
+Each TypeScript type, the file in `lib/` it lives in, and
+where it is reused. A response is typed once. Each zod
+schema, by its export name: all of them live in
+`app/validationSchemas.ts`, never in a component, page or
+other file.
 If none: state "No new types".
 
 ## Data access
@@ -166,7 +169,14 @@ or revalidates.
 
 ## Components
 Each new component, its file, whether it is a Server or
-Client Component, and what it renders. List the shadcn
+Client Component, and what it renders. Place each file by
+the "Code organization" section of `CLAUDE.md` and say
+which routes use it: one route → that route's folder; a
+route and its nested routes → the parent route folder;
+unrelated routes → `app/components/`. List any existing
+component that must move because its usage changes. Each
+`page.tsx` only fetches data and lays out components. List
+the shadcn
 components to add with `npx shadcn@latest add <component>`.
 
 ## Forms and validation
@@ -229,6 +239,13 @@ Specific constraints Claude must follow. Always include:
 - Semantic tokens only; no hex/OKLCH literals or raw
   palette classes in components
 - No `src/` directory; imports use the `@/*` alias
+- Every zod schema lives in `app/validationSchemas.ts`
+- Components are placed by where they are used (route
+  folder, parent route folder, or `app/components/`);
+  shadcn primitives stay in `components/ui/`
+- `page.tsx` fetches data and lays out components; UI
+  blocks, form logic and interactive state live in small,
+  focused components
 - No teacher or admin pages
 - No tests and no test runner
 - Update the "Implemented vs Stub Pages" table in
