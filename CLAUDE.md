@@ -156,6 +156,28 @@ npx tsc --noEmit
 npm run build
 ```
 
+## Feature workflow
+
+Each feature goes through the same three steps:
+
+1. `/create-spec <feature>` — needs a clean working tree. It branches `feature/<feature>` off an up-to-date `main` and writes the feature's spec file, asking about anything this file leaves open (API field names in particular). Build features in the order of the table below: later specs pick up rules that earlier ones deferred.
+2. Implement from the spec, in Plan Mode. Flip the page statuses in [Implemented vs Stub Pages](#implemented-vs-stub-pages) in the same change.
+3. Verify with the commands under [Testing](#testing).
+
+| Feature | Spec file | Scope |
+| ------- | --------- | ----- |
+| `foundation` | `.claude/specs/01-foundation.md` | Route-group layouts, nav and footer, providers, axios instances, data-access module, `/api/…` proxy, `proxy.ts`, global `not-found` / `error` |
+| `subjects` | `.claude/specs/02-subjects.md` | `/`, `/subjects`, `/subjects/[id]` |
+| `auth` | `.claude/specs/03-auth.md` | `/login`, `/register`, `/forgot-password`, `/password/reset/confirm/[uid]/[token]`, logout |
+| `schedule` | `.claude/specs/04-schedule.md` | `/schedule` |
+| `weekly-classes` | `.claude/specs/05-weekly-classes.md` | `/classes/new`, `/classes/[id]/edit` |
+| `trial-lesson` | `.claude/specs/06-trial-lesson.md` | `/trial-lesson` |
+| `account` | `.claude/specs/07-account.md` | `/account` |
+
+A spec is the detailed contract for one feature and records the decisions made on ambiguous behaviour. This file is the source a spec is written from: if a spec and this file contradict each other, stop and ask; do not pick one.
+
+`.claude/commands/create-spec.md` carries its own copy of this table and refers to this file's sections by heading name. When a feature, a heading or a rule changes here, update the command in the same change.
+
 ## Implemented vs Stub Pages
 
 Routes live in three route groups, each with its own layout: `(marketing)` (public), `(auth)` (guest only), and `(app)` (logged-in students). **Keep this table updated as pages are built** — flip the status in the same change that implements the page.
