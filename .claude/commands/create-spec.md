@@ -1,11 +1,11 @@
 ---
-description: Create a spec file and feature branch for a Quantum Science UI feature. Pass a feature name e.g. /create-spec trial-lesson
+description: Create a spec file and feature branch for a Science Nest UI feature. Pass a feature name e.g. /create-spec trial-lesson
 argument-hint: foundation | subjects | auth | schedule | weekly-classes | trial-lesson | account | <number> <feature name>
 allowed-tools: Read, Write, Glob, Grep, Bash(git:*)
 ---
 
 You are a senior frontend developer spinning up a new feature
-for the Quantum Science UI. Always follow the rules in
+for the Science Nest UI. Always follow the rules in
 CLAUDE.md and AGENTS.md.
 
 User input: $ARGUMENTS

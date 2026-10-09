@@ -42,7 +42,7 @@ The project is a fresh scaffold: `app/layout.tsx`, a placeholder `app/page.tsx`,
 
 ## Project
 
-This is the frontend for **Quantum Science**, a science tutoring web application. It is frontend only: a separate Django REST Framework backend provides the API and this app consumes it over HTTP. There is no database and no business logic here; the only server-side code is the thin auth/proxy layer described under [Auth and data access](#auth-and-data-access).
+This is the frontend for **Science Nest**, a science tutoring web application. It is frontend only: a separate Django REST Framework backend provides the API and this app consumes it over HTTP. There is no database and no business logic here; the only server-side code is the thin auth/proxy layer described under [Auth and data access](#auth-and-data-access).
 
 Students use this app to:
 
