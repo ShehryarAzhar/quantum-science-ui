@@ -1,0 +1,18 @@
+## Auth and data access
+
+Tokens live in **httpOnly cookies** set by this app's server, never in `localStorage` or anywhere page scripts can read them. The browser never calls Django directly.
+
+- **Login / register / logout** run on the server (Server Actions or Route Handlers): they call Djoser, then set or clear the `access` and `refresh` cookies with `httpOnly`, `secure` (in production), `sameSite: "lax"`, `path: "/"`, and an expiry matching the token lifetime.
+- **Server Components** read the access cookie through a `server-only` data-access module and call Django with the `JWT` header. Do auth checks there, close to the data — not in layouts, which don't re-render on navigation.
+- **Client Components** call a same-origin Route Handler proxy under `/api/…`, which attaches the `JWT` header from the cookie and forwards to Django. Pass Django's status code and error body through untouched so forms can show its validation errors.
+- **Refreshing**: Server Components cannot write cookies, so an expired access token is refreshed (`/auth/jwt/refresh/`) in `proxy.ts` or a Route Handler, not during render. If refresh fails, clear both cookies and send the user to `/login`.
+- **Route protection**: `proxy.ts` at the repo root (Next 16's name for middleware) does the optimistic check — no cookie → redirect `(app)` routes to `/login`; has cookie → redirect guest-only routes to `/schedule`. It only reads the cookie; it is not the security boundary. Django is. `/reset-password/[uid]/[token]` is the one `(auth)` route that is **not** guest only: it opens for everyone, so the emailed link also works for a student who is still signed in on that browser.
+- **Password changes**: the backend rejects every earlier token after a password change, so each flow replaces or clears the cookies itself.
+  - *Account page*: the Server Action calls `set_password`, then immediately logs in again with the new password (`POST /auth/jwt/create/`) and replaces both cookies, so the student stays signed in on this device. If that login fails, clear both cookies and redirect to `/login`.
+  - *Reset from the emailed link*: on success, clear any cookies and redirect to `/login` with a success message; the student signs in with the new password.
+  - *Other devices*: their next request gets 401 and the refresh fails too, which is the refresh-failure path above. Never retry a 401 in a loop.
+- **Forgot password**: `reset_password` answers 204 whether or not the email exists, so show the same "if an account exists for that email, we've sent a link" message every time and never hint which emails are registered. On 429, say plainly that there have been too many requests and to try again later.
+- **Delete account**: runs on the server like logout. After a confirmation step it calls `DELETE /auth/users/me/`, clears both cookies and redirects to `/`.
+- **Not a student account**: a 403 when *reading* `/schedule/`, `/classes/` or `/trial-lessons/` means the logged-in user has no student profile. It is not an error to retry and not a reason to log them out: render one shared notice in place of the page content (it lives in `app/components/`, since unrelated `(app)` routes use it) that explains the account isn't a student account and offers Log out and a link to `/subjects`. `/account` still works for such a user and shows the phone number as "Not set". Don't confuse this with the 403 on editing or deleting a locked trial lesson, which is shown as that action's error message.
+
+Keep one configured axios instance per side (server → Django, client → `/api`) in `lib/`; don't call `axios` or `fetch` ad hoc from components.
